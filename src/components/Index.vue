@@ -18,7 +18,7 @@
 
 
       <div class="list">
-        <div :id="'test'+item.id" v-for="item in items" class="item">
+        <div :id="'test'+item.id" v-for="(item, index) in items" class="item">
 
           <i class="item-primary">lightbulb_outline</i>
           <div class="item-content has-secondary">
@@ -28,9 +28,9 @@
           <div class="item-secondary">
             <i slot="target">
         more_vert
-        <q-popover :ref="'popover'+item.id">
+        <q-popover  :ref="'popover'">
           <div class="list">
-            <div class="item item-link" @click="$refs.popover.close()">
+            <div class="item item-link" @click="deleteItem(item.id, index)">
               <div class="item-content">Delete</div>
             </div>
           </div>
@@ -61,7 +61,7 @@
       add() {
         var base = this
         Dialog.create({
-          title: 'Prompt',
+          title: 'New task',
           form: {
             task: {
               type: 'textbox',
@@ -87,6 +87,7 @@
           ]
         })
       },
+
       refresh() {
         this.db.allDocs({ include_docs: true }).then(function (result) {
           return result.rows;
@@ -95,9 +96,19 @@
         }.bind(this)).catch(function (err) {
           console.error(err);
         });
-    }
+      },
+
+      deleteItem(idItem, index) {
+
+        this.$refs.popover[0].close(index);
+        var base = this;
+        base.db.get(idItem).then(function (doc) {
+          base.db.remove(doc);
+          base.refresh();
+        });
+      }
     },
-  
+
     mounted() {
       this.db = new PouchDB('localdb');
       this.db.allDocs({ include_docs: true }).then(function (result) {
