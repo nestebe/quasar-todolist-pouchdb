@@ -16,13 +16,15 @@
     -->
     <div class="layout-view">
 
+      <q-search @input="search" v-model="searchModel"></q-search>
+
 
       <div class="list">
-        <div :id="'test'+item.id" v-for="(item, index) in items" class="item">
+        <div :id="'test'+item._id" v-for="(item, index) in items" class="item">
 
           <i class="item-primary">lightbulb_outline</i>
           <div class="item-content has-secondary">
-            <div>{{item.doc.task}}</div>
+            <div>{{item.task}}</div>
           </div>
 
           <div class="item-secondary">
@@ -30,7 +32,7 @@
         more_vert
         <q-popover  :ref="'popover'">
           <div class="list">
-            <div class="item item-link" @click="deleteItem(item.id, index)">
+            <div class="item item-link" @click="deleteItem(item._id, index)">
               <div class="item-content">Delete</div>
             </div>
           </div>
@@ -46,18 +48,19 @@
 
 <script>
 
-
   import Quasar, { Utils, Dialog } from 'quasar'
   var PouchDB = require('pouchdb');
+  PouchDB.plugin(require('pouchdb-find'));
+
   export default {
     data() {
       return {
         items: [],
-        db: null
+        db: null,
+        searchModel: ""
       }
     },
     methods: {
-
       add() {
         var base = this
         Dialog.create({
@@ -74,51 +77,67 @@
             {
               label: 'Add',
               handler(data) {
+
+
                 base.db.post({
                   task: data.task
                 }).then(function (response) {
                   // handle response
-                  base.refresh();
+                  base.search();
+                  console.log(response);
                 }).catch(function (err) {
                   console.log(err);
                 });
+
+
               }
             }
           ]
         })
       },
+      search() {
+        console.log(this.searchModel);
+        var base = this
 
-      refresh() {
-        this.db.allDocs({ include_docs: true }).then(function (result) {
-          return result.rows;
-        }).then(function (response) {
-          this.items = response;
-        }.bind(this)).catch(function (err) {
-          console.error(err);
+        this.db.find({
+          //include_docs: true,
+          selector: { task: { $regex: base.searchModel } },
+          //  fields: ['task']
+        }).then(function (result) {
+          // yo, a result
+          console.log(result)
+
+          base.items = result.docs;
+        }).catch(function (err) {
+          // ouch, an error
+          console.log(err)
         });
-      },
 
+      },
       deleteItem(idItem, index) {
 
         this.$refs.popover[0].close(index);
         var base = this;
         base.db.get(idItem).then(function (doc) {
           base.db.remove(doc);
-          base.refresh();
+          base.search();
         });
       }
     },
 
     mounted() {
       this.db = new PouchDB('localdb');
-      this.db.allDocs({ include_docs: true }).then(function (result) {
-        return result.rows;
-      }).then(function (response) {
-        this.items = response;
-        console.log(this.items);
-      }.bind(this)).catch(function (err) {
-        console.error(err);
+
+      //index for search
+      this.db.createIndex({
+        index: {
+          fields: ['task']
+        }
       });
+
+      this.search()
+
+
 
     },
     beforeDestroy() {
