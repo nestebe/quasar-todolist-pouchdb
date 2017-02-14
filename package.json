@@ -15,7 +15,7 @@
     "material-design-icons": "^3.0.1",
     "moment": "^2.15.0",
     "pouchdb": "^6.1.0",
-    "quasar-framework": "^0.11.0",
+    "quasar-framework": "^0.13.1",
     "roboto-fontface": "^0.6.0",
     "velocity-animate": "^1.2.3",
     "vue": "2.1.7",
