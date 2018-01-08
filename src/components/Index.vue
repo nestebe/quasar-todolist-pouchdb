@@ -101,18 +101,14 @@
 
         this.db
           .find({
-            //include_docs: true,
             selector: { task: { $regex: base.searchModel } }
-            //  fields: ['task']
           })
           .then(function (result) {
-            // yo, a result
             console.log(result);
 
             base.items = result.docs;
           })
           .catch(function (err) {
-            // ouch, an error
             console.log(err);
           });
       },
@@ -129,7 +125,7 @@
     mounted() {
       this.db = new PouchDB("localdb");
 
-      //index for search
+      //Creation d'un index pour la recherche
       this.db.createIndex({
         index: {
           fields: ["task"]
