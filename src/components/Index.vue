@@ -5,8 +5,8 @@
         My Todo
       </q-toolbar-title>
       <button @click="add">
-      <i>add</i>
-    </button>
+        <i>add</i>
+      </button>
     </div>
 
     <!--
@@ -20,7 +20,7 @@
 
 
       <div class="list">
-        <div :id="'test'+item._id" v-for="(item, index) in items" class="item">
+        <div :id="'test'+item._id" v-for="(item, index) in items" v-bind:key="index" class="item">
 
           <i class="item-primary">lightbulb_outline</i>
           <div class="item-content has-secondary">
@@ -29,15 +29,15 @@
 
           <div class="item-secondary">
             <i slot="target">
-        more_vert
-        <q-popover  :ref="'popover'">
-          <div class="list">
-            <div class="item item-link" @click="deleteItem(item._id, index)">
-              <div class="item-content">Delete</div>
-            </div>
-          </div>
-        </q-popover>
-      </i>
+              more_vert
+              <q-popover :ref="'popover'">
+                <div class="list">
+                  <div class="item item-link" @click="deleteItem(item._id, index)">
+                    <div class="item-content">Delete</div>
+                  </div>
+                </div>
+              </q-popover>
+            </i>
           </div>
         </div>
 
@@ -47,10 +47,9 @@
 </template>
 
 <script>
-
-  import Quasar, { Utils, Dialog } from 'quasar'
-  var PouchDB = require('pouchdb');
-  PouchDB.plugin(require('pouchdb-find'));
+  import Quasar, { Utils, Dialog } from "quasar";
+  var PouchDB = require("pouchdb");
+ // PouchDB.plugin(require("pouchdb-find"));
 
   export default {
     data() {
@@ -58,64 +57,64 @@
         items: [],
         db: null,
         searchModel: ""
-      }
+      };
     },
     methods: {
       add() {
-        var base = this
+        var base = this;
         Dialog.create({
-          title: 'New task',
+          title: "New task",
           form: {
             task: {
-              type: 'textbox',
-              label: 'My task',
-              model: ''
+              type: "textbox",
+              label: "My task",
+              model: ""
             }
           },
           buttons: [
-            'Cancel',
+            "Cancel",
             {
-              label: 'Add',
+              label: "Add",
               handler(data) {
-
-
-                base.db.post({
-                  task: data.task
-                }).then(function (response) {
-                  // handle response
-                  base.search();
-                  console.log(response);
-                }).catch(function (err) {
-                  console.log(err);
-                });
-
-
+                base.db
+                  .post({
+                    task: data.task
+                  })
+                  .then(function (response) {
+                    // handle response
+                    base.search();
+                    console.log(response);
+                  })
+                  .catch(function (err) {
+                    console.log(err);
+                  });
               }
             }
           ]
-        })
+        });
       },
       search() {
         console.log(this.searchModel);
-        var base = this
+        var base = this;
 
-        this.db.find({
-          //include_docs: true,
-          selector: { task: { $regex: base.searchModel } },
-          //  fields: ['task']
-        }).then(function (result) {
-          // yo, a result
-          console.log(result)
+        this.db
+          .find({
+            //include_docs: true,
+            selector: { task: { $regex: base.searchModel } }
+            //  fields: ['task']
+          })
+          .then(function (result) {
+            // yo, a result
+            console.log(result);
 
-          base.items = result.docs;
-        }).catch(function (err) {
-          // ouch, an error
-          console.log(err)
-        });
-
+            base.items = result.docs;
+          })
+          .catch(function (err) {
+            // ouch, an error
+            console.log(err);
+          });
       },
       deleteItem(idItem, index) {
-
         this.$refs.popover[0].close(index);
         var base = this;
         base.db.get(idItem).then(function (doc) {
@@ -126,22 +125,17 @@
     },
 
     mounted() {
-      this.db = new PouchDB('localdb');
+      this.db = new PouchDB("localdb");
 
       //index for search
       this.db.createIndex({
         index: {
-          fields: ['task']
+          fields: ["task"]
         }
       });
 
-      this.search()
-
-
-
+      this.search();
     },
-    beforeDestroy() {
-
-    }
-  }
+    beforeDestroy() { }
+  };
 </script>
