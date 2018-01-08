@@ -48,9 +48,11 @@
 
 <script>
   import Quasar, { Utils, Dialog } from "quasar";
-  var PouchDB = require("pouchdb");
+ // var PouchDB = require("pouchdb");
  // PouchDB.plugin(require("pouchdb-find"));
 
+ import PouchDB from "pouchdb";
+ PouchDB.plugin(require("pouchdb-find"));
   export default {
     data() {
       return {
