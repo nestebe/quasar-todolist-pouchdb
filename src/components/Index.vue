@@ -47,93 +47,91 @@
 </template>
 
 <script>
-  import Quasar, { Utils, Dialog } from "quasar";
- // var PouchDB = require("pouchdb");
- // PouchDB.plugin(require("pouchdb-find"));
+import Quasar, { Utils, Dialog } from "quasar";
 
- import PouchDB from "pouchdb";
- PouchDB.plugin(require("pouchdb-find"));
-  export default {
-    data() {
-      return {
-        items: [],
-        db: null,
-        searchModel: ""
-      };
-    },
-    methods: {
-      add() {
-        var base = this;
-        Dialog.create({
-          title: "New task",
-          form: {
-            task: {
-              type: "textbox",
-              label: "My task",
-              model: ""
+import PouchDB from "pouchdb";
+PouchDB.plugin(require("pouchdb-find"));
+export default {
+  data() {
+    return {
+      items: [],
+      db: null,
+      searchModel: ""
+    };
+  },
+  methods: {
+    add() {
+      var base = this;
+      Dialog.create({
+        title: "New task",
+        form: {
+          task: {
+            type: "textbox",
+            label: "My task",
+            model: ""
+          }
+        },
+        buttons: [
+          "Cancel",
+          {
+            label: "Add",
+            handler(data) {
+              base.db
+                .post({
+                  task: data.task
+                })
+                .then(function(response) {
+                  // handle response
+                  base.search();
+                  console.log(response);
+                })
+                .catch(function(err) {
+                  console.log(err);
+                });
             }
-          },
-          buttons: [
-            "Cancel",
-            {
-              label: "Add",
-              handler(data) {
-                base.db
-                  .post({
-                    task: data.task
-                  })
-                  .then(function (response) {
-                    // handle response
-                    base.search();
-                    console.log(response);
-                  })
-                  .catch(function (err) {
-                    console.log(err);
-                  });
-              }
-            }
-          ]
-        });
-      },
-      search() {
-        console.log(this.searchModel);
-        var base = this;
-
-        this.db
-          .find({
-            selector: { task: { $regex: base.searchModel } }
-          })
-          .then(function (result) {
-            console.log(result);
-
-            base.items = result.docs;
-          })
-          .catch(function (err) {
-            console.log(err);
-          });
-      },
-      deleteItem(idItem, index) {
-        this.$refs.popover[0].close(index);
-        var base = this;
-        base.db.get(idItem).then(function (doc) {
-          base.db.remove(doc);
-          base.search();
-        });
-      }
-    },
-
-    mounted() {
-      this.db = new PouchDB("localdb");
-
-      //Creation d'un index pour la recherche
-      this.db.createIndex({
-        index: {
-          fields: ["task"]
-        }
+          }
+        ]
       });
-
-      this.search();
     },
-    beforeDestroy() { }
-  };
+    search() {
+      console.log(this.searchModel);
+      var base = this;
+
+      this.db
+        .find({
+          selector: { task: { $regex: base.searchModel } }
+        })
+        .then(function(result) {
+          console.log(result);
+
+          base.items = result.docs;
+        })
+        .catch(function(err) {
+          console.log(err);
+        });
+    },
+    deleteItem(idItem, index) {
+      this.$refs.popover[0].close(index);
+      var base = this;
+      base.db.get(idItem).then(function(doc) {
+        base.db.remove(doc);
+        base.search();
+      });
+    }
+  },
+
+  mounted() {
+    this.db = new PouchDB("localdb");
+
+    //Creation d'un index pour la recherche
+    this.db.createIndex({
+      index: {
+        fields: ["task"]
+      }
+    });
+
+    this.search();
+  },
+  beforeDestroy() {}
+};
 </script>
