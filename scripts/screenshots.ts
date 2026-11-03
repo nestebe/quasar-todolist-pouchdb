@@ -12,13 +12,24 @@ import type { Browser, BrowserContextOptions, Page } from 'playwright-core';
 const baseUrl = process.argv[2] ?? process.env.APP_URL ?? 'http://localhost:9000';
 const outDir = new URL('../docs/screenshots/', import.meta.url);
 
-const todos = [
-  { title: 'Préparer la démo Quasar + PouchDB', done: false },
-  { title: 'Ajouter le mode hors ligne (PWA)', done: false },
-  { title: 'Configurer la réplication avec CouchDB', done: true },
-  { title: 'Écrire les tests du repository', done: true },
-  { title: 'Acheter du café ☕', done: false },
-];
+const demoTodos = {
+  'fr-FR': [
+    { title: 'Préparer la démo Quasar + PouchDB', done: false },
+    { title: 'Ajouter le mode hors ligne (PWA)', done: false },
+    { title: 'Configurer la réplication avec CouchDB', done: true },
+    { title: 'Écrire les tests du repository', done: true },
+    { title: 'Acheter du café ☕', done: false },
+  ],
+  'en-US': [
+    { title: 'Prepare the Quasar + PouchDB demo', done: false },
+    { title: 'Add offline mode (PWA)', done: false },
+    { title: 'Set up CouchDB replication', done: true },
+    { title: 'Write repository tests', done: true },
+    { title: 'Buy coffee ☕', done: false },
+  ],
+};
+
+type Locale = keyof typeof demoTodos;
 
 async function launchBrowser(): Promise<Browser> {
   for (const channel of ['chrome', 'msedge']) {
@@ -32,8 +43,9 @@ async function launchBrowser(): Promise<Browser> {
 }
 
 /** Fills a fresh (empty) database through the UI. */
-async function seed(page: Page): Promise<void> {
-  const input = page.getByLabel('Nouvelle tâche');
+async function seed(page: Page, locale: Locale): Promise<void> {
+  const todos = demoTodos[locale];
+  const input = page.locator('form input');
   for (const todo of [...todos].reverse()) {
     await input.fill(todo.title);
     await input.press('Enter');
@@ -48,13 +60,13 @@ async function seed(page: Page): Promise<void> {
 async function shoot(
   browser: Browser,
   name: string,
-  options: BrowserContextOptions,
+  options: BrowserContextOptions & { locale: Locale },
   scenario?: (page: Page) => Promise<void>,
 ): Promise<void> {
   const context = await browser.newContext({ deviceScaleFactor: 2, ...options });
   const page = await context.newPage();
   await page.goto(baseUrl);
-  await seed(page);
+  await seed(page, options.locale);
   await scenario?.(page);
   // drop hover/focus highlights, then let transitions (ripples, notifications) settle
   await page.mouse.move(0, 0);
@@ -82,14 +94,20 @@ async function shoot(
   console.log(`✔ docs/screenshots/${name}.png`);
 }
 
-const desktop = { viewport: { width: 1024, height: 640 } };
-const mobile = { viewport: { width: 390, height: 760 }, isMobile: true, hasTouch: true };
+const desktop = { viewport: { width: 1024, height: 640 }, locale: 'fr-FR' as const };
+const mobile = {
+  viewport: { width: 390, height: 760 },
+  isMobile: true,
+  hasTouch: true,
+  locale: 'fr-FR' as const,
+};
 
 await mkdir(outDir, { recursive: true });
 const browser = await launchBrowser();
 try {
   await shoot(browser, 'desktop-light', { ...desktop, colorScheme: 'light' });
   await shoot(browser, 'desktop-dark', { ...desktop, colorScheme: 'dark' });
+  await shoot(browser, 'desktop-en', { ...desktop, locale: 'en-US', colorScheme: 'light' });
   await shoot(browser, 'search', { ...desktop, colorScheme: 'light' }, async (page) => {
     await page.getByLabel('Rechercher').fill('quasar');
     await page.getByText('1 résultat').waitFor();

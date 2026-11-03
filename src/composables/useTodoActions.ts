@@ -1,4 +1,5 @@
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 
 import type { Todo } from '@/models/todo';
 import { useTodoStore } from '@/stores/todo-store';
@@ -6,6 +7,7 @@ import { useTodoStore } from '@/stores/todo-store';
 /** UI-level actions on todos: dialogs, notifications, undo and error reporting. */
 export function useTodoActions() {
   const $q = useQuasar();
+  const { t } = useI18n();
   const store = useTodoStore();
 
   async function run(action: () => Promise<unknown>): Promise<void> {
@@ -13,7 +15,7 @@ export function useTodoActions() {
       await action();
     } catch (error) {
       console.error(error);
-      $q.notify({ type: 'negative', message: "L'opération a échoué", caption: String(error) });
+      $q.notify({ type: 'negative', message: t('actions.failed'), caption: String(error) });
     }
   }
 
@@ -27,7 +29,7 @@ export function useTodoActions() {
 
   function edit(todo: Todo): void {
     $q.dialog({
-      title: 'Modifier la tâche',
+      title: t('actions.editTitle'),
       prompt: {
         model: todo.title,
         type: 'text',
@@ -42,12 +44,12 @@ export function useTodoActions() {
     return run(async () => {
       await store.remove(todo);
       $q.notify({
-        message: `« ${todo.title} » supprimée`,
+        message: t('actions.removed', { title: todo.title }),
         icon: 'delete',
         timeout: 4000,
         actions: [
           {
-            label: 'Annuler',
+            label: t('actions.undo'),
             color: 'yellow',
             handler: () => void run(() => store.restore(todo)),
           },
@@ -58,15 +60,15 @@ export function useTodoActions() {
 
   function removeCompleted(): void {
     $q.dialog({
-      title: 'Supprimer les tâches terminées',
-      message: `${store.doneCount} tâche(s) terminée(s) seront supprimées.`,
+      title: t('actions.removeCompletedTitle'),
+      message: t('actions.removeCompletedMessage', store.doneCount),
       cancel: true,
-      ok: { label: 'Supprimer', color: 'negative', flat: true },
+      ok: { label: t('actions.removeCompletedOk'), color: 'negative', flat: true },
     }).onOk(
       () =>
         void run(async () => {
           const count = await store.removeCompleted();
-          $q.notify({ type: 'positive', message: `${count} tâche(s) supprimée(s)` });
+          $q.notify({ type: 'positive', message: t('actions.removedCount', count) });
         }),
     );
   }

@@ -11,8 +11,8 @@
           clearable
           debounce="250"
           class="q-px-md"
-          placeholder="Rechercher (pouchdb-find $regex)"
-          aria-label="Rechercher"
+          :placeholder="t('search.placeholder')"
+          :aria-label="t('search.label')"
           @update:model-value="(value) => void store.setSearch(String(value ?? ''))"
         >
           <template #prepend>
@@ -57,7 +57,7 @@
               no-caps
               color="negative"
               icon="delete_sweep"
-              label="Supprimer les terminées"
+              :label="t('list.removeCompleted')"
               :disable="store.doneCount === 0"
               @click="actions.removeCompleted"
             />
@@ -70,6 +70,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import TodoFilters from '@/components/TodoFilters.vue';
 import TodoForm from '@/components/TodoForm.vue';
@@ -79,27 +80,25 @@ import { useTodoStore } from '@/stores/todo-store';
 
 const store = useTodoStore();
 const actions = useTodoActions();
+const { t } = useI18n();
 
 const remainingLabel = computed(() => {
-  if (store.search) {
-    const results = store.todos.length;
-    return `${results} résultat${results > 1 ? 's' : ''}`;
-  }
-  const count = store.activeCount;
-  return count === 0 ? 'Tout est fait 🎉' : `${count} tâche${count > 1 ? 's' : ''} à faire`;
+  return store.search
+    ? t('list.results', store.todos.length)
+    : t('list.remaining', store.activeCount);
 });
 
 const emptyState = computed(() => {
   if (store.search) {
-    return { icon: 'search_off', message: `Aucun résultat pour « ${store.search} »` };
+    return { icon: 'search_off', message: t('list.empty.search', { search: store.search }) };
   }
   if (store.filter === 'done') {
-    return { icon: 'hourglass_empty', message: 'Aucune tâche terminée' };
+    return { icon: 'hourglass_empty', message: t('list.empty.done') };
   }
   if (store.filter === 'active' && store.todos.length > 0) {
-    return { icon: 'celebration', message: 'Rien à faire, profitez-en !' };
+    return { icon: 'celebration', message: t('list.empty.active') };
   }
-  return { icon: 'checklist', message: 'Aucune tâche pour le moment' };
+  return { icon: 'checklist', message: t('list.empty.all') };
 });
 </script>
 

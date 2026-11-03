@@ -6,8 +6,8 @@
       outlined
       autofocus
       maxlength="200"
-      placeholder="Que faut-il faire ?"
-      aria-label="Nouvelle tâche"
+      :placeholder="t('form.placeholder')"
+      :aria-label="t('form.label')"
     >
       <template #prepend>
         <q-icon name="add_task" />
@@ -17,8 +17,8 @@
       type="submit"
       color="primary"
       icon="add"
-      :label="$q.screen.gt.xs ? 'Ajouter' : undefined"
-      aria-label="Ajouter"
+      :label="$q.screen.gt.xs ? t('form.add') : undefined"
+      :aria-label="t('form.add')"
       unelevated
       class="q-py-sm"
       :disable="!title.trim()"
@@ -28,8 +28,11 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 const emit = defineEmits<{ submit: [title: string] }>();
+
+const { t } = useI18n();
 
 const title = ref('');
 

@@ -6,6 +6,7 @@
         <q-toolbar-title>Todo PouchDB</q-toolbar-title>
 
         <SyncStatus :status="store.syncStatus" />
+        <LanguageSwitcher class="q-ml-sm" />
 
         <q-btn
           flat
@@ -13,7 +14,7 @@
           dense
           class="q-ml-sm"
           :icon="$q.dark.isActive ? 'light_mode' : 'dark_mode'"
-          :aria-label="$q.dark.isActive ? 'Thème clair' : 'Thème sombre'"
+          :aria-label="$q.dark.isActive ? t('layout.lightTheme') : t('layout.darkTheme')"
           @click="$q.dark.toggle()"
         />
       </q-toolbar>
@@ -26,8 +27,12 @@
 </template>
 
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue';
 import SyncStatus from '@/components/SyncStatus.vue';
 import { useTodoStore } from '@/stores/todo-store';
 
 const store = useTodoStore();
+const { t } = useI18n();
 </script>

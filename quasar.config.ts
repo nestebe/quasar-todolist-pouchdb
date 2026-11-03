@@ -3,10 +3,10 @@
 
 import { defineConfig } from '#q-app';
 
-export default defineConfig(() => {
+export default defineConfig((ctx) => {
   return {
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: ['pouchdb'],
+    boot: ['i18n', 'pouchdb'],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['app.scss'],
@@ -28,6 +28,14 @@ export default defineConfig(() => {
       // https://v2.quasar.dev/quasar-cli-vite/handling-import-meta-env
 
       vitePlugins: [
+        [
+          '@intlify/unplugin-vue-i18n/vite',
+          {
+            ssr: ctx.mode.ssr || ctx.mode.ssg,
+            // precompiles the messages so the lighter vue-i18n runtime-only build can be used
+            include: [ctx.appPaths.resolve.app('src/i18n')],
+          },
+        ],
         [
           'vite-plugin-checker',
           {
@@ -53,7 +61,6 @@ export default defineConfig(() => {
       config: {
         dark: 'auto',
       },
-      lang: 'fr',
       plugins: ['Dialog', 'Notify'],
     },
 

@@ -4,10 +4,10 @@ POC d'une todo list **offline-first** : les données vivent dans le navigateur (
 [PouchDB](https://pouchdb.com)) et peuvent être synchronisées en temps réel avec un serveur
 [CouchDB](https://couchdb.apache.org).
 
-| Clair                                                   | Sombre                                             |
-| ------------------------------------------------------- | -------------------------------------------------- |
-| ![Liste des tâches](docs/screenshots/desktop-light.png) | ![Thème sombre](docs/screenshots/desktop-dark.png) |
-| ![Recherche pouchdb-find](docs/screenshots/search.png)  |                                                    |
+| Clair                                                   | Sombre                                              |
+| ------------------------------------------------------- | --------------------------------------------------- |
+| ![Liste des tâches](docs/screenshots/desktop-light.png) | ![Thème sombre](docs/screenshots/desktop-dark.png)  |
+| ![Recherche pouchdb-find](docs/screenshots/search.png)  | ![English version](docs/screenshots/desktop-en.png) |
 
 | Mobile                                     | Suppression annulable                                        |
 | ------------------------------------------ | ------------------------------------------------------------ |
@@ -18,6 +18,7 @@ POC d'une todo list **offline-first** : les données vivent dans le navigateur (
 - [Quasar 2](https://quasar.dev) (CLI `@quasar/app-vite` 3 / Vite 8) + Vue 3 `<script setup>`
 - TypeScript strict
 - [Pinia](https://pinia.vuejs.org) pour l'état applicatif
+- [vue-i18n](https://vue-i18n.intlify.dev) : interface en français et en anglais
 - PouchDB 9 (`pouchdb-browser`) + `pouchdb-find` (requêtes Mango)
 - Vitest (tests du repository sur une base PouchDB en mémoire)
 - ESLint 10 (flat config) + Prettier
@@ -36,6 +37,17 @@ POC d'une todo list **offline-first** : les données vivent dans le navigateur (
 | Synchronisation bidirectionnelle      | `sync({ live: true, retry: true })` vers CouchDB |
 
 Le statut de la synchro (Local, Synchronisé, Hors ligne, Erreur…) est affiché dans la barre du haut.
+
+## Langues
+
+L'interface est disponible en **français** et en **anglais**. La langue est choisie
+automatiquement selon le navigateur, puis peut être changée avec le sélecteur de la barre du haut
+(le choix est mémorisé). Les composants Quasar (boutons des dialogues…) et le format des dates
+suivent la langue choisie.
+
+Pour ajouter une langue : créer `src/i18n/<code>/index.ts` (typé par `satisfies` sur le schéma
+anglais, donc une clé manquante est une erreur de compilation), puis le déclarer dans
+`src/i18n/index.ts` avec le pack de langue Quasar correspondant.
 
 ## Démarrage
 
@@ -85,7 +97,10 @@ pour voir la synchro en direct, ou coupez CouchDB pour tester le mode hors ligne
 
 ```text
 src/
-├── boot/pouchdb.ts               # Initialise la base (index, flux de changements, synchro)
+├── boot/
+│   ├── i18n.ts                   # vue-i18n + pack de langue Quasar
+│   └── pouchdb.ts                # Initialise la base (index, flux de changements, synchro)
+├── i18n/                         # Messages en-US / fr-FR, détection de la langue
 ├── models/todo.ts                # Types du domaine (Todo, TodoFilter…)
 ├── repositories/
 │   ├── todo-repository.ts        # Accès aux données (CRUD, find, bulkDocs, changes)
@@ -95,7 +110,7 @@ src/
 │   └── sync.ts                   # Réplication live avec CouchDB
 ├── stores/todo-store.ts          # Store Pinia (état, filtres, compteurs)
 ├── composables/useTodoActions.ts # Actions UI : dialogues, notifications, annulation
-├── components/                   # TodoForm, TodoItem, TodoFilters, SyncStatus
+├── components/                   # TodoForm, TodoItem, TodoFilters, SyncStatus, LanguageSwitcher
 ├── layouts/MainLayout.vue
 └── pages/                        # IndexPage, ErrorNotFound
 ```

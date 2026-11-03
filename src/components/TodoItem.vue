@@ -4,7 +4,7 @@
       <q-checkbox
         :model-value="todo.done"
         color="positive"
-        :aria-label="todo.done ? 'Marquer comme à faire' : 'Marquer comme terminée'"
+        :aria-label="todo.done ? t('todo.markActive') : t('todo.markDone')"
         @update:model-value="emit('toggle')"
       />
     </q-item-section>
@@ -13,13 +13,22 @@
       <q-item-label :class="{ 'todo-item__title--done': todo.done }" class="todo-item__title">
         {{ todo.title }}
       </q-item-label>
-      <q-item-label caption>{{ createdLabel }}</q-item-label>
+      <q-item-label caption>
+        {{ t('todo.createdAt', { date: d(new Date(todo.createdAt), 'long') }) }}
+      </q-item-label>
     </q-item-section>
 
     <q-item-section side>
       <div class="row no-wrap q-gutter-x-xs">
-        <q-btn flat round dense icon="edit" aria-label="Modifier" @click.prevent="emit('edit')">
-          <q-tooltip>Modifier</q-tooltip>
+        <q-btn
+          flat
+          round
+          dense
+          icon="edit"
+          :aria-label="t('todo.edit')"
+          @click.prevent="emit('edit')"
+        >
+          <q-tooltip>{{ t('todo.edit') }}</q-tooltip>
         </q-btn>
         <q-btn
           flat
@@ -27,10 +36,10 @@
           dense
           icon="delete_outline"
           color="negative"
-          aria-label="Supprimer"
+          :aria-label="t('todo.remove')"
           @click.prevent="emit('remove')"
         >
-          <q-tooltip>Supprimer</q-tooltip>
+          <q-tooltip>{{ t('todo.remove') }}</q-tooltip>
         </q-btn>
       </div>
     </q-item-section>
@@ -38,11 +47,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import type { Todo } from '@/models/todo';
 
-const props = defineProps<{ todo: Todo }>();
+defineProps<{ todo: Todo }>();
 
 const emit = defineEmits<{
   toggle: [];
@@ -50,11 +59,7 @@ const emit = defineEmits<{
   remove: [];
 }>();
 
-const dateFormat = new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' });
-
-const createdLabel = computed(
-  () => `Créée le ${dateFormat.format(new Date(props.todo.createdAt))}`,
-);
+const { t, d } = useI18n();
 </script>
 
 <style lang="scss" scoped>

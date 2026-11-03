@@ -26,6 +26,7 @@
     "pouchdb-find": "^9.0.0",
     "quasar": "^2.35.2",
     "vue": "^3.5.44",
+    "vue-i18n": "^11.4.18",
     "vue-router": "^5.4.0"
   },
   "engines": {
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@intlify/unplugin-vue-i18n": "^11.2.8",
     "@quasar/app-vite": "^3.10.3",
     "@types/node": "^22.20.5",
     "@types/pouchdb-browser": "^6.1.5",
