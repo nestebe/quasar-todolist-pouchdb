@@ -1,13 +1,17 @@
-version: '2'
-
+# Local CouchDB used as the remote replica of the PouchDB database.
+# Usage: docker compose up -d  ->  http://localhost:5984/_utils (Fauxton)
 services:
-  app:
-    build: .
-    image: your-docker-org/your-app-name
-    command: sh
-    volumes:
-      - .:/opt/app
-      - /opt/app/node_modules
+  couchdb:
+    image: couchdb:3
+    restart: unless-stopped
+    environment:
+      COUCHDB_USER: ${COUCHDB_USER:-admin}
+      COUCHDB_PASSWORD: ${COUCHDB_PASSWORD:-admin}
     ports:
-      - 8080:8080
-    tty: true
+      - '5984:5984'
+    volumes:
+      - couchdb-data:/opt/couchdb/data
+      - ./docker/couchdb/cors.ini:/opt/couchdb/etc/local.d/cors.ini:ro
+
+volumes:
+  couchdb-data:
